@@ -1,6 +1,6 @@
 import { Err, Ok } from '@nangohq/utils';
 
-import { getRunners } from '../runner/runner.js';
+import { getRunner, getRunners } from '../runner/runner.js';
 
 import type { RuntimeAdapter } from './adapter.js';
 import type { NangoProps } from '@nangohq/types';
@@ -14,11 +14,11 @@ export class RunnerRuntimeAdapter implements RuntimeAdapter {
                 return Err(runners.error);
             }
             const results = await Promise.allSettled(runners.value.map((runner) => runner.client.abort.mutate({ taskId: params.taskId })));
-            const isAborted = results.some((result) => result.status === 'fulfilled' && result.value);
-            if (!isAborted) {
+            const didAbort = results.some((result) => result.status === 'fulfilled' && result.value);
+            if (!didAbort) {
                 return Err(`Error aborting script for task: ${params.taskId}`);
             }
-            return Ok(isAborted);
+            return Ok(didAbort);
         } catch (err) {
             return Err(new Error(`Error aborting script for task: ${params.taskId}`, { cause: err }));
         }

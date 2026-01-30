@@ -53,6 +53,9 @@ describe('getRunners', () => {
         const result = await getRunners(123);
 
         expect(result.isOk()).toBe(true);
+        if (result.isErr()) {
+            throw result.error;
+        }
         expect(result.value).toHaveLength(2);
         expect(result.value.map((runner) => runner.url)).toEqual(['http://runner-a', 'http://runner-b']);
     });
@@ -68,6 +71,9 @@ describe('getRunners', () => {
         const result = await getRunners(123);
 
         expect(result.isOk()).toBe(true);
+        if (result.isErr()) {
+            throw result.error;
+        }
         expect(result.value).toHaveLength(1);
         expect(result.value[0]?.url).toBe('http://runner-fallback');
     });

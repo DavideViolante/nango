@@ -34,10 +34,13 @@ function getRunnerId(suffix: string): string {
     return `${env}-runner-account-${suffix}`;
 }
 
+function getRunnerIdForTeam(teamId: number): string {
+    return isProd ? getRunnerId(`${teamId}`) : getRunnerId('default');
+}
+
 export async function getRunner(teamId: number): Promise<Result<Runner>> {
     try {
-        // a runner per account in prod only
-        const runnerId = isProd ? getRunnerId(`${teamId}`) : getRunnerId('default');
+        const runnerId = getRunnerIdForTeam(teamId);
         const runner = await getOrStartRunner(runnerId).catch(() => getOrStartRunner(getRunnerId('default')));
         return Ok(runner);
     } catch (err) {
@@ -47,7 +50,7 @@ export async function getRunner(teamId: number): Promise<Result<Runner>> {
 
 export async function getRunners(teamId: number): Promise<Result<Runner[]>> {
     try {
-        const runnerId = isProd ? getRunnerId(`${teamId}`) : getRunnerId('default');
+        const runnerId = getRunnerIdForTeam(teamId);
         if (envs.RUNNER_TYPE === 'REMOTE') {
             const runner = await getOrStartRunner(runnerId).catch(() => getOrStartRunner(getRunnerId('default')));
             return Ok([runner]);
